@@ -80,4 +80,6 @@ dependencies {
 
     implementation(libs.compose.lifecycle.viewmodel)
     implementation(libs.compose.lifecycle.runtime)
+
+    implementation(libs.androidx.material.icons)
 }

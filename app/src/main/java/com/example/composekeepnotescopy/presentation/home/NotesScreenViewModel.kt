@@ -14,10 +14,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(
+class NotesScreenViewModel @Inject constructor(
    private val toDoRepository: ToDoRepository
 ) : ViewModel() {
-    private val _state = MutableStateFlow(HomeScreenUiState())
+    private val _state = MutableStateFlow(NotesScreenUiState())
     val state = _state.asStateFlow()
 
     init {
