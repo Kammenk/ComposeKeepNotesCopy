@@ -1,4 +1,4 @@
-package com.example.composekeepnotescopy.presentation.home
+package com.example.composekeepnotescopy.presentation.notes
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
