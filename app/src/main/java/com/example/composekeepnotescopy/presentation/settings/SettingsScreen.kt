@@ -14,6 +14,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,11 +36,12 @@ internal fun SettingsScreen(modifier: Modifier) {
 
 @Composable
 fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
+    var checked = remember { true }
     Surface(modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(horizontal = 12.dp)) {
             Text(
                 "Display Options",
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
                 modifier = Modifier.padding(vertical = 10.dp)
             )
@@ -49,6 +51,17 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Add new items to bottom")
+                Switch(checked = checked, onCheckedChange = { checked = !checked }, colors = SwitchDefaults.colors(
+                        checkedTrackColor = Color.Blue
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Move checked items to bottom")
                 Switch(checked = true, onCheckedChange = {}, colors = SwitchDefaults.colors(
                     checkedTrackColor = Color.Blue
                 ))
@@ -58,19 +71,15 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Move checked items to bottom")
-                Switch(checked = true, onCheckedChange = {})
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Text("Display rich link preview")
-                Switch(checked = true, onCheckedChange = {})
+                Switch(checked = true, onCheckedChange = {}, colors = SwitchDefaults.colors(
+                    checkedTrackColor = Color.Blue
+                ))
             }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -78,24 +87,33 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 Text("Light")
             }
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
-            Text("Note creation",fontWeight = FontWeight.Bold,
+            Text(
+                "Note creation", fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
-                modifier = Modifier.padding(vertical = 10.dp))
+                modifier = Modifier.padding(top = 10.dp)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Create text notes by default")
-                Switch(checked = false, onCheckedChange = {})
+                Switch(checked = true, onCheckedChange = {}, colors = SwitchDefaults.colors(
+                    checkedTrackColor = Color.Blue
+                ))
             }
             Text("You can always long press to create other note types")
             Spacer(modifier = Modifier)
-            Text("Reminder defaults",fontWeight = FontWeight.Bold,
+            Text(
+                "Reminder defaults",
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
-                modifier = Modifier.padding(vertical = 10.dp))
+                modifier = Modifier.padding(top = 10.dp)
+            )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -103,7 +121,9 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 Text("")
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -111,7 +131,9 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 Text("")
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -119,16 +141,20 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
                 Text("")
             }
             Spacer(modifier = Modifier)
-            Text("Sharing",fontWeight = FontWeight.Bold,
+            Text(
+                "Sharing", fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
-                modifier = Modifier.padding(vertical = 10.dp))
+                modifier = Modifier.padding(top = 10.dp)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Enable sharing")
-                Switch(checked = true, onCheckedChange = {})
+                Switch(checked = true, onCheckedChange = {}, colors = SwitchDefaults.colors(
+                    checkedTrackColor = Color.Blue
+                ))
             }
         }
     }
