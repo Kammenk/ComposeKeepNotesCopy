@@ -150,10 +150,10 @@ class MainActivity : ComponentActivity() {
                                 onClick = {
 
                                 },
-                                containerColor = Color.White,
+                                containerColor = Color.Black,
                                 modifier = Modifier
                                     .border(1.dp, Color.Black, RoundedCornerShape(10.dp)),
-                                elevation = FloatingActionButtonDefaults.elevation(0.dp)
+                                contentColor = Color.White
                             ) {
                                 Icon(Icons.Filled.Add, "Floating action button.")
                             }

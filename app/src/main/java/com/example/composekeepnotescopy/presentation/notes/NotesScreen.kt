@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.composekeepnotescopy.data.ToDo
 import com.example.composekeepnotescopy.data.ToDoImportance
+import com.example.composekeepnotescopy.ui.theme.Orange
 import com.example.composekeepnotescopy.util.DateUtils
 
 @Composable
@@ -110,7 +111,8 @@ fun NotesScreenContent(
                     contentDescription = "LightBulb",
                     modifier = Modifier
                     .height(140.dp)
-                    .width(140.dp), tint = Color.Magenta)
+                    .width(140.dp), tint = Orange
+                )
                 Text(
                     text = "Notes you add appear here",
                     fontSize = 16.sp,
