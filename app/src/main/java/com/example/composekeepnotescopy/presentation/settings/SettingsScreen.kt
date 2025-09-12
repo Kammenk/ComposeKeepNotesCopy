@@ -31,12 +31,20 @@ internal fun SettingsScreen(modifier: Modifier) {
     val settingsScreenViewModel: SettingsScreenViewModel = hiltViewModel()
     val state by settingsScreenViewModel.state.collectAsStateWithLifecycle()
 
-    SettingsScreenContent(modifier = modifier, state = state)
+    SettingsScreenContent(
+        modifier = modifier,
+        state = state,
+        onEvent = settingsScreenViewModel::onEvent
+    )
 }
 
 
 @Composable
-fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
+fun SettingsScreenContent(
+    modifier: Modifier,
+    state: SettingsScreenUiState,
+    onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit
+) {
     val addItemsToBottomCheckedState = remember { mutableStateOf(true) }
     val moveCheckedItemsToBottomCheckedState = remember { mutableStateOf(true) }
     val displayRichLinkPreviewCheckedState = remember { mutableStateOf(true) }
@@ -58,7 +66,15 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
             ) {
                 Text("Add new items to bottom")
                 Switch(
-                    checked = addItemsToBottomCheckedState.value, onCheckedChange = { addItemsToBottomCheckedState.value = it }, colors = SwitchDefaults.colors(
+                    checked = state.addItemsToBottomChecked,
+                    onCheckedChange = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.AddItemsToBottom(
+                                it
+                            )
+                        )
+                    },
+                    colors = SwitchDefaults.colors(
                         checkedTrackColor = Color.Blue
                     )
                 )
@@ -186,5 +202,5 @@ fun SettingsScreenContent(modifier: Modifier, state: SettingsScreenUiState) {
 @Preview
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreenContent(modifier = Modifier, state = SettingsScreenUiState())
+    SettingsScreenContent(modifier = Modifier, state = SettingsScreenUiState(), onEvent = {})
 }
