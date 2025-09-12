@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.composekeepnotescopy.domain.DataStoreRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,8 @@ class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Prefe
         val createTextNotesByDefaultPreferencesKey =
             booleanPreferencesKey("CREATE_TEXT_NOTES_BY_DEFAULT")
         val enableSharingPreferencesKey = booleanPreferencesKey("ENABLE_SHARING")
+
+        val themeColorPreferencesKey = stringPreferencesKey("THEME_COLOR")
     }
 
 
@@ -80,5 +83,14 @@ class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Prefe
         }
     }
 
+    override suspend fun getThemeColor(): Flow<String?> =
+        dataStore.data.map { preferences ->
+            preferences[themeColorPreferencesKey]
+        }
 
+    override suspend fun setThemeColor(value: String) {
+        dataStore.edit { preferences ->
+            preferences[themeColorPreferencesKey] = value
+        }
+    }
 }

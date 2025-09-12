@@ -58,7 +58,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ComposeKeepNotesCopyTheme {
+            ComposeKeepNotesCopyTheme(
+                darkTheme = KeepNotesApplication.isDarkTheme
+            ) {
                 val noLabels = false
                 val navController = rememberNavController()
                 val startScreen = Screen.NOTES

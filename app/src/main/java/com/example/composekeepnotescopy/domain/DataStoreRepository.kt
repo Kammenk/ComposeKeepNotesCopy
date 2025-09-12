@@ -19,4 +19,6 @@ interface DataStoreRepository {
 
     suspend fun getEnableSharingCheckedState(): Flow<Boolean?>
     suspend fun setEnableSharingCheckedState(value: Boolean)
+    suspend fun getThemeColor(): Flow<String?>
+    suspend fun setThemeColor(value: String)
 }

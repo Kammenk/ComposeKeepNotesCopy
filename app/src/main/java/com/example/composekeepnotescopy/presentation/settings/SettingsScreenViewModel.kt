@@ -23,16 +23,39 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
         getDisplayRichLinkInPreview()
         getCreateTextNotesByDefault()
         getEnableSharing()
+        getThemeColor()
     }
 
     fun onEvent(event: SettingsUiEvent) {
         viewModelScope.launch(Dispatchers.IO) {
             when (event) {
-                is SettingsUiEvent.AddItemsToBottom -> { dataStoreRepository.setAddItemsToBottomCheckedState(event.value) }
-                is SettingsUiEvent.MoveCheckedItemsToBottom -> { dataStoreRepository.setMoveCheckedItemsToBottomCheckedState(event.value) }
-                is SettingsUiEvent.DisplayRichLinkInPreview -> { dataStoreRepository.setDisplayRichLinkPreviewCheckedState(event.value) }
-                is SettingsUiEvent.CreateTextNotesByDefault -> { dataStoreRepository.setCreateTextNotesByDefaultCheckedState(event.value) }
-                is SettingsUiEvent.EnableSharing -> { dataStoreRepository.setEnableSharingCheckedState(event.value) }
+                is SettingsUiEvent.AddItemsToBottom -> {
+                    dataStoreRepository.setAddItemsToBottomCheckedState(event.value)
+                }
+
+                is SettingsUiEvent.MoveCheckedItemsToBottom -> {
+                    dataStoreRepository.setMoveCheckedItemsToBottomCheckedState(event.value)
+                }
+
+                is SettingsUiEvent.DisplayRichLinkInPreview -> {
+                    dataStoreRepository.setDisplayRichLinkPreviewCheckedState(event.value)
+                }
+
+                is SettingsUiEvent.CreateTextNotesByDefault -> {
+                    dataStoreRepository.setCreateTextNotesByDefaultCheckedState(event.value)
+                }
+
+                is SettingsUiEvent.EnableSharing -> {
+                    dataStoreRepository.setEnableSharingCheckedState(event.value)
+                }
+
+                is SettingsUiEvent.ShowThemeChangeDialog -> {
+                    _state.value = _state.value.copy(showThemeChangeDialog = true)
+                }
+
+                is SettingsUiEvent.ThemeColor -> {
+                    dataStoreRepository.setThemeColor(event.value.text)
+                }
             }
         }
     }
@@ -77,11 +100,21 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
         }
     }
 
+    private fun getThemeColor() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.getThemeColor().collect {
+                _state.value = _state.value.copy(themeColor = it ?: "Light")
+            }
+        }
+    }
+
     sealed interface SettingsUiEvent {
         data class AddItemsToBottom(val value: Boolean) : SettingsUiEvent
         data class MoveCheckedItemsToBottom(val value: Boolean) : SettingsUiEvent
         data class DisplayRichLinkInPreview(val value: Boolean) : SettingsUiEvent
         data class CreateTextNotesByDefault(val value: Boolean) : SettingsUiEvent
         data class EnableSharing(val value: Boolean) : SettingsUiEvent
+        data object ShowThemeChangeDialog : SettingsUiEvent
+        data class ThemeColor(val value: com.example.composekeepnotescopy.ThemeColor) : SettingsUiEvent
     }
 }

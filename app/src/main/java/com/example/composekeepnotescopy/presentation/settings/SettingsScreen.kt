@@ -1,5 +1,7 @@
 package com.example.composekeepnotescopy.presentation.settings
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -23,8 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.composekeepnotescopy.ThemeColor
 
 @Composable
 internal fun SettingsScreen(modifier: Modifier) {
@@ -86,8 +92,13 @@ fun SettingsScreenContent(
             ) {
                 Text("Move checked items to bottom")
                 Switch(
-                    checked = moveCheckedItemsToBottomCheckedState.value, onCheckedChange = {
-                        moveCheckedItemsToBottomCheckedState.value = it
+                    checked = state.moveCheckedItemsToBottomChecked,
+                    onCheckedChange = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.MoveCheckedItemsToBottom(
+                                it
+                            )
+                        )
                     }, colors = SwitchDefaults.colors(
                         checkedTrackColor = Color.Blue
                     )
@@ -100,8 +111,13 @@ fun SettingsScreenContent(
             ) {
                 Text("Display rich link preview")
                 Switch(
-                    checked = displayRichLinkPreviewCheckedState.value, onCheckedChange = {
-                        displayRichLinkPreviewCheckedState.value = it
+                    checked = state.displayRichLinkPreviewChecked,
+                    onCheckedChange = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.DisplayRichLinkInPreview(
+                                it
+                            )
+                        )
                     }, colors = SwitchDefaults.colors(
                         checkedTrackColor = Color.Blue
                     )
@@ -110,12 +126,15 @@ fun SettingsScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 10.dp),
+                    .padding(vertical = 10.dp)
+                    .clickable(onClick = {
+                        onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ShowThemeChangeDialog)
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("Theme")
-                Text("Light")
+                Text(text = state.themeColor ?: if (isSystemInDarkTheme()) ThemeColor.DARK.text else ThemeColor.LIGHT.text)
             }
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
             Text(
@@ -130,8 +149,13 @@ fun SettingsScreenContent(
             ) {
                 Text("Create text notes by default")
                 Switch(
-                    checked = createTextNotesByDefaultCheckedState.value, onCheckedChange = {
-                        createTextNotesByDefaultCheckedState.value = it
+                    checked = state.createTextNotesByDefaultChecked,
+                    onCheckedChange = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.CreateTextNotesByDefault(
+                                it
+                            )
+                        )
                     }, colors = SwitchDefaults.colors(
                         checkedTrackColor = Color.Blue
                     )
@@ -188,11 +212,65 @@ fun SettingsScreenContent(
             ) {
                 Text("Enable sharing")
                 Switch(
-                    checked = enableSharingCheckedState.value, onCheckedChange = {
-                        enableSharingCheckedState.value = it
+                    checked = state.enableSharingChecked,
+                    onCheckedChange = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.EnableSharing(
+                                it
+                            )
+                        )
                     }, colors = SwitchDefaults.colors(
                         checkedTrackColor = Color.Blue
                     )
+                )
+            }
+        }
+    }
+
+    if (state.showThemeChangeDialog) {
+        ThemeSwitchDialog(state, onEvent)
+    }
+}
+
+@Composable
+fun ThemeSwitchDialog(state: SettingsScreenUiState, onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit) {
+    Dialog(onDismissRequest = {}) {
+        Card(modifier = Modifier) {
+            Column(modifier = Modifier.padding(vertical = 15.dp)) {
+                Text(modifier = Modifier.padding(start = 15.dp), text = "Choose theme", fontSize = 24.sp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = state.themeColor == ThemeColor.LIGHT.text,
+                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.LIGHT)) })
+                    Text(text = "Light")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = state.themeColor == ThemeColor.DARK.text,
+                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.DARK)) })
+                    Text(text = "Dark")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = state.themeColor == ThemeColor.SYSTEM_DEFAULT.text,
+                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.SYSTEM_DEFAULT)) })
+                    Text(text = "System default")
+                }
+                Text(modifier = Modifier.padding(start = 15.dp, top = 15.dp), text = "To change the theme of your Keep widget and notifications, manage you Android screen and display settings.")
+                Text(
+                    text = "Cancel", modifier = Modifier
+                        .clickable(onClick = {})
+                        .align(Alignment.End)
+                        .padding(end = 25.dp, top = 15.dp, bottom = 5.dp)
                 )
             }
         }

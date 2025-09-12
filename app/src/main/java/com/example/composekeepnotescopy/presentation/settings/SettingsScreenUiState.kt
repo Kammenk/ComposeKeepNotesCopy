@@ -5,5 +5,7 @@ data class SettingsScreenUiState(
     val moveCheckedItemsToBottomChecked: Boolean = false,
     val displayRichLinkPreviewChecked: Boolean = false,
     val createTextNotesByDefaultChecked: Boolean = false,
-    val enableSharingChecked: Boolean = false
+    val enableSharingChecked: Boolean = false,
+    val themeColor: String? = null,
+    val showThemeChangeDialog: Boolean = false
 )
