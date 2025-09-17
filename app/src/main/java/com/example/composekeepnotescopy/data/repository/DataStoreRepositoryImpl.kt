@@ -4,13 +4,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.composekeepnotescopy.domain.DataStoreRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Preferences>) : DataStoreRepository {
+class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Preferences>) :
+    DataStoreRepository {
 
     private companion object {
         val addItemsToBottomPreferencesKey = booleanPreferencesKey("ADD_ITEMS_TO_BOTTOM")
@@ -21,8 +23,11 @@ class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Prefe
         val createTextNotesByDefaultPreferencesKey =
             booleanPreferencesKey("CREATE_TEXT_NOTES_BY_DEFAULT")
         val enableSharingPreferencesKey = booleanPreferencesKey("ENABLE_SHARING")
-
         val themeColorPreferencesKey = stringPreferencesKey("THEME_COLOR")
+
+        val reminderMorningPreferencesKey = stringPreferencesKey("REMINDER_MORNING")
+        val reminderAfternoonPreferencesKey = stringPreferencesKey("REMINDER_AFTERNOON")
+        val reminderEveningPreferencesKey = stringPreferencesKey("REMINDER_EVENING")
     }
 
 
@@ -91,6 +96,39 @@ class DataStoreRepositoryImpl @Inject constructor(val dataStore: DataStore<Prefe
     override suspend fun setThemeColor(value: String) {
         dataStore.edit { preferences ->
             preferences[themeColorPreferencesKey] = value
+        }
+    }
+
+    override suspend fun getReminderMorning(): Flow<String?> =
+        dataStore.data.map { preferences ->
+            preferences[reminderMorningPreferencesKey]
+        }
+
+    override suspend fun setReminderMorning(value: String) {
+        dataStore.edit { preferences ->
+            preferences[reminderMorningPreferencesKey] = value
+        }
+    }
+
+    override suspend fun getReminderAfternoon(): Flow<String?> =
+        dataStore.data.map { preferences ->
+            preferences[reminderAfternoonPreferencesKey]
+        }
+
+    override suspend fun setReminderAfternoon(value: String) {
+        dataStore.edit { preferences ->
+            preferences[reminderAfternoonPreferencesKey] = value
+        }
+    }
+
+    override suspend fun getReminderEvening(): Flow<String?> =
+        dataStore.data.map { preferences ->
+            preferences[reminderEveningPreferencesKey]
+        }
+
+    override suspend fun setReminderEvening(value: String) {
+        dataStore.edit { preferences ->
+            preferences[reminderEveningPreferencesKey] = value
         }
     }
 }

@@ -7,5 +7,7 @@ data class SettingsScreenUiState(
     val createTextNotesByDefaultChecked: Boolean = false,
     val enableSharingChecked: Boolean = false,
     val themeColor: String? = null,
-    val showThemeChangeDialog: Boolean = false
+    val reminderMorningTime: SettingsScreenViewModel.ReminderData? = null,
+    val reminderAfternoonTime: SettingsScreenViewModel.ReminderData? = null,
+    val reminderEveningTime: SettingsScreenViewModel.ReminderData? = null,
 )

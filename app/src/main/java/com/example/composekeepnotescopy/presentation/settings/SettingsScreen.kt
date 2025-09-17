@@ -9,17 +9,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.KeyboardAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,11 +60,15 @@ fun SettingsScreenContent(
     state: SettingsScreenUiState,
     onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit
 ) {
-    val addItemsToBottomCheckedState = remember { mutableStateOf(true) }
-    val moveCheckedItemsToBottomCheckedState = remember { mutableStateOf(true) }
-    val displayRichLinkPreviewCheckedState = remember { mutableStateOf(true) }
-    val createTextNotesByDefaultCheckedState = remember { mutableStateOf(false) }
-    val enableSharingCheckedState = remember { mutableStateOf(true) }
+    val timesOfDay = listOf(
+        SettingsScreenViewModel.TimeOfDay.MORNING,
+        SettingsScreenViewModel.TimeOfDay.AFTERNOON,
+        SettingsScreenViewModel.TimeOfDay.EVENING
+    )
+
+    var selectedTimeOfDay by remember { mutableStateOf(timesOfDay[0]) }
+    val shouldShowThemeColorDialog = remember { mutableStateOf(false) }
+    val shouldShowInputPickerDialog = remember { mutableStateOf(false) }
 
     Surface(modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(horizontal = 12.dp)) {
@@ -66,7 +79,15 @@ fun SettingsScreenContent(
                 modifier = Modifier.padding(vertical = 10.dp)
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.AddItemsToBottom(
+                                !state.addItemsToBottomChecked
+                            )
+                        )
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -86,7 +107,15 @@ fun SettingsScreenContent(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.MoveCheckedItemsToBottom(
+                                !state.moveCheckedItemsToBottomChecked
+                            )
+                        )
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -105,7 +134,15 @@ fun SettingsScreenContent(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.DisplayRichLinkInPreview(
+                                !state.displayRichLinkPreviewChecked
+                            )
+                        )
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -128,13 +165,16 @@ fun SettingsScreenContent(
                     .fillMaxWidth()
                     .padding(vertical = 10.dp)
                     .clickable(onClick = {
-                        onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ShowThemeChangeDialog)
+                        shouldShowThemeColorDialog.value = true
                     }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("Theme")
-                Text(text = state.themeColor ?: if (isSystemInDarkTheme()) ThemeColor.DARK.text else ThemeColor.LIGHT.text)
+                Text(
+                    text = state.themeColor
+                        ?: if (isSystemInDarkTheme()) ThemeColor.DARK.text else ThemeColor.LIGHT.text
+                )
             }
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
             Text(
@@ -143,7 +183,15 @@ fun SettingsScreenContent(
                 modifier = Modifier.padding(top = 10.dp)
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.CreateTextNotesByDefault(
+                                !state.createTextNotesByDefaultChecked
+                            )
+                        )
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -172,32 +220,64 @@ fun SettingsScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 15.dp),
+                    .padding(top = 15.dp)
+                    .clickable(onClick = {
+                        selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.MORNING
+                        shouldShowInputPickerDialog.value = true
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Morning")
-                Text("08:00")
+                Text(
+                    text = state.reminderMorningTime.toString(),
+                    modifier = Modifier.clickable(onClick = {
+                        selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.MORNING
+                        shouldShowInputPickerDialog.value = true
+                    })
+                )
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 25.dp),
+                    .padding(top = 25.dp)
+                    .clickable(
+                        onClick = {
+                            selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.AFTERNOON
+                            shouldShowInputPickerDialog.value = true
+                        }
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Afternoon")
-                Text("13:00")
+                Text(
+                    text = state.reminderAfternoonTime.toString(),
+                    modifier = Modifier.clickable(onClick = {
+                        selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.AFTERNOON
+                        shouldShowInputPickerDialog.value = true
+                    })
+                )
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 25.dp),
+                    .padding(top = 25.dp)
+                    .clickable(onClick = {
+                        selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.EVENING
+                        shouldShowInputPickerDialog.value = true
+                    }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Evening")
-                Text("18:00")
+                Text(
+                    text = state.reminderEveningTime.toString(),
+                    modifier = Modifier.clickable(onClick = {
+                        selectedTimeOfDay = SettingsScreenViewModel.TimeOfDay.EVENING
+                        shouldShowInputPickerDialog.value = true
+                    })
+                )
             }
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
             Text(
@@ -227,54 +307,216 @@ fun SettingsScreenContent(
         }
     }
 
-    if (state.showThemeChangeDialog) {
-        ThemeSwitchDialog(state, onEvent)
+    if (shouldShowThemeColorDialog.value) {
+        ThemeSwitchDialog(state, onEvent, shouldShowThemeColorDialog)
     }
+
+    if (shouldShowInputPickerDialog.value) {
+        TimePickerDialog(
+            onEvent,
+            selectedTimeOfDay,
+            when (selectedTimeOfDay) {
+                SettingsScreenViewModel.TimeOfDay.MORNING -> state.reminderMorningTime
+                SettingsScreenViewModel.TimeOfDay.AFTERNOON -> state.reminderAfternoonTime
+                SettingsScreenViewModel.TimeOfDay.EVENING -> state.reminderEveningTime
+            } ?: SettingsScreenViewModel.ReminderData(0, 0),
+            shouldShowInputPickerDialog
+        )
+    }
+
 }
 
 @Composable
-fun ThemeSwitchDialog(state: SettingsScreenUiState, onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit) {
-    Dialog(onDismissRequest = {}) {
+fun ThemeSwitchDialog(
+    state: SettingsScreenUiState,
+    onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit,
+    onDismiss: MutableState<Boolean>
+) {
+    Dialog(onDismissRequest = { onDismiss.value = false }) {
         Card(modifier = Modifier) {
             Column(modifier = Modifier.padding(vertical = 15.dp)) {
-                Text(modifier = Modifier.padding(start = 15.dp), text = "Choose theme", fontSize = 24.sp)
+                Text(
+                    modifier = Modifier.padding(start = 15.dp),
+                    text = "Choose theme",
+                    fontSize = 24.sp
+                )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = {
+                                onEvent.invoke(
+                                    SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                        ThemeColor.LIGHT
+                                    )
+                                )
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
                         selected = state.themeColor == ThemeColor.LIGHT.text,
-                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.LIGHT)) })
+                        onClick = {
+                            onEvent.invoke(
+                                SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                    ThemeColor.LIGHT
+                                )
+                            )
+                        })
                     Text(text = "Light")
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = {
+                                onEvent.invoke(
+                                    SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                        ThemeColor.DARK
+                                    )
+                                )
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
                         selected = state.themeColor == ThemeColor.DARK.text,
-                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.DARK)) })
+                        onClick = {
+                            onEvent.invoke(
+                                SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                    ThemeColor.DARK
+                                )
+                            )
+                        })
                     Text(text = "Dark")
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = {
+                                onEvent.invoke(
+                                    SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                        ThemeColor.SYSTEM_DEFAULT
+                                    )
+                                )
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
                         selected = state.themeColor == ThemeColor.SYSTEM_DEFAULT.text,
-                        onClick = { onEvent.invoke(SettingsScreenViewModel.SettingsUiEvent.ThemeColor(ThemeColor.SYSTEM_DEFAULT)) })
+                        onClick = {
+                            onEvent.invoke(
+                                SettingsScreenViewModel.SettingsUiEvent.ThemeColor(
+                                    ThemeColor.SYSTEM_DEFAULT
+                                )
+                            )
+                        })
                     Text(text = "System default")
                 }
-                Text(modifier = Modifier.padding(start = 15.dp, top = 15.dp), text = "To change the theme of your Keep widget and notifications, manage you Android screen and display settings.")
+                Text(
+                    modifier = Modifier.padding(start = 15.dp, top = 15.dp),
+                    text = "To change the theme of your Keep widget and notifications, manage you Android screen and display settings."
+                )
                 Text(
                     text = "Cancel", modifier = Modifier
-                        .clickable(onClick = {})
+                        .clickable(onClick = { onDismiss.value = false })
                         .align(Alignment.End)
                         .padding(end = 25.dp, top = 15.dp, bottom = 5.dp)
                 )
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    onEvent: (SettingsScreenViewModel.SettingsUiEvent) -> Unit,
+    timeOfDay: SettingsScreenViewModel.TimeOfDay,
+    reminderData: SettingsScreenViewModel.ReminderData,
+    onDismiss: MutableState<Boolean>
+) {
+    val isTimePickerShown = remember { mutableStateOf(false) }
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = reminderData.hour,
+        initialMinute = reminderData.minute,
+        is24Hour = true,
+    )
+
+    Dialog(onDismissRequest = { onDismiss.value = false }) {
+        Card() {
+            Column(modifier = Modifier.padding(15.dp)) {
+                Text("Select time", modifier = Modifier.padding(bottom = 15.dp))
+                if (!isTimePickerShown.value) {
+                    TimeInput(state = timePickerState)
+                } else {
+                    TimePicker(state = timePickerState)
+                }
+                Spacer(modifier = Modifier.padding(vertical = 10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (!isTimePickerShown.value) {
+                        Icon(
+                            imageVector = Icons.Outlined.AccessTime, "Input Picker Icon",
+                            modifier = Modifier.clickable(onClick = {
+                                isTimePickerShown.value = true
+                            })
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.KeyboardAlt, "Time Picker Icon",
+                            modifier = Modifier.clickable(onClick = {
+                                isTimePickerShown.value = false
+                            })
+                        )
+                    }
+                    Text(
+                        "Cancel", modifier = Modifier
+                            .clickable(onClick = { onDismiss.value = false })
+                            .padding(start = 25.dp)
+                    )
+                    Text("OK", modifier = Modifier.clickable(onClick = {
+                        onEvent.invoke(
+                            SettingsScreenViewModel.SettingsUiEvent.ReminderTimes(
+                                timeOfDay = timeOfDay,
+                                reminderData = SettingsScreenViewModel.ReminderData(
+                                    hour = timePickerState.hour,
+                                    minute = timePickerState.minute
+                                )
+                            )
+                        )
+                        onDismiss.value = false
+                    }))
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun TimePickerDialogPreview() {
+    TimePickerDialog(
+        onEvent = {},
+        timeOfDay = SettingsScreenViewModel.TimeOfDay.MORNING,
+        reminderData = SettingsScreenViewModel.ReminderData(8, 0),
+        onDismiss = mutableStateOf(true)
+    )
+}
+
+@Preview
+@Composable
+fun ThemeSwitchDialogPreview() {
+    ThemeSwitchDialog(
+        state = SettingsScreenUiState(),
+        onEvent = {},
+        onDismiss = mutableStateOf(true)
+    )
 }
 
 @Preview

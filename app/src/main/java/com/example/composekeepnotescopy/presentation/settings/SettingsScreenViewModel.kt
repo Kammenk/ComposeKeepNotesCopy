@@ -2,6 +2,7 @@ package com.example.composekeepnotescopy.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composekeepnotescopy.ThemeColor
 import com.example.composekeepnotescopy.domain.DataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,9 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
         getCreateTextNotesByDefault()
         getEnableSharing()
         getThemeColor()
+        getReminderMorning()
+        getReminderAfternoon()
+        getReminderEvening()
     }
 
     fun onEvent(event: SettingsUiEvent) {
@@ -49,12 +53,22 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
                     dataStoreRepository.setEnableSharingCheckedState(event.value)
                 }
 
-                is SettingsUiEvent.ShowThemeChangeDialog -> {
-                    _state.value = _state.value.copy(showThemeChangeDialog = true)
-                }
-
                 is SettingsUiEvent.ThemeColor -> {
                     dataStoreRepository.setThemeColor(event.value.text)
+                }
+
+                is SettingsUiEvent.ReminderTimes -> {
+                    when (event.timeOfDay) {
+                        TimeOfDay.MORNING -> {
+                            dataStoreRepository.setReminderMorning(value = event.reminderData.toString())
+                        }
+                        TimeOfDay.AFTERNOON -> {
+                            dataStoreRepository.setReminderAfternoon(value = event.reminderData.toString())
+                        }
+                        TimeOfDay.EVENING -> {
+                            dataStoreRepository.setReminderEvening(value = event.reminderData.toString())
+                        }
+                    }
                 }
             }
         }
@@ -103,7 +117,47 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
     private fun getThemeColor() {
         viewModelScope.launch(Dispatchers.IO) {
             dataStoreRepository.getThemeColor().collect {
-                _state.value = _state.value.copy(themeColor = it ?: "Light")
+                _state.value = _state.value.copy(themeColor = it ?: ThemeColor.LIGHT.text)
+            }
+        }
+    }
+
+    private fun getReminderMorning() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.getReminderMorning().collect { morningReminderTime ->
+                _state.value = _state.value.copy(reminderMorningTime = timeOfDayConverter(morningReminderTime, TimeOfDay.MORNING))
+            }
+        }
+    }
+
+    private fun getReminderAfternoon() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.getReminderAfternoon().collect { afternoonReminderTime ->
+                _state.value = _state.value.copy(reminderAfternoonTime = timeOfDayConverter(afternoonReminderTime, TimeOfDay.AFTERNOON))
+            }
+        }
+    }
+
+    private fun getReminderEvening() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.getReminderEvening().collect { eveningReminderTime ->
+                _state.value = _state.value.copy(reminderEveningTime = timeOfDayConverter(eveningReminderTime, TimeOfDay.EVENING))
+            }
+        }
+    }
+
+    private fun timeOfDayConverter(time: String?, timeOfDay: TimeOfDay): ReminderData {
+        return time?.let {
+            val time = time.split(":")
+            val hour =  time[0].toInt()
+            val minute = time[1].toInt()
+
+            ReminderData(hour, minute)
+        } ?: run {
+            when (timeOfDay) {
+                TimeOfDay.MORNING -> ReminderData(7, 0)
+                TimeOfDay.AFTERNOON -> ReminderData(13, 0)
+                TimeOfDay.EVENING -> ReminderData(18, 0)
             }
         }
     }
@@ -114,7 +168,25 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
         data class DisplayRichLinkInPreview(val value: Boolean) : SettingsUiEvent
         data class CreateTextNotesByDefault(val value: Boolean) : SettingsUiEvent
         data class EnableSharing(val value: Boolean) : SettingsUiEvent
-        data object ShowThemeChangeDialog : SettingsUiEvent
         data class ThemeColor(val value: com.example.composekeepnotescopy.ThemeColor) : SettingsUiEvent
+        data class ReminderTimes(val timeOfDay: TimeOfDay, val reminderData: ReminderData) : SettingsUiEvent
+    }
+
+    enum class TimeOfDay {
+        MORNING,
+        AFTERNOON,
+        EVENING
+    }
+
+    data class ReminderData(
+        val hour: Int,
+        val minute: Int,
+    ) {
+        override fun toString(): String {
+            val hour = if (hour < 10) "0$hour" else hour
+            val minute = if (minute < 10) "0$minute" else minute
+            return "$hour:$minute"
+        }
+
     }
 }

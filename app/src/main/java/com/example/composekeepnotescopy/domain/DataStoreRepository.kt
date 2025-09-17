@@ -21,4 +21,13 @@ interface DataStoreRepository {
     suspend fun setEnableSharingCheckedState(value: Boolean)
     suspend fun getThemeColor(): Flow<String?>
     suspend fun setThemeColor(value: String)
+
+    suspend fun getReminderMorning(): Flow<String?>
+    suspend fun setReminderMorning(value: String)
+
+    suspend fun getReminderAfternoon(): Flow<String?>
+    suspend fun setReminderAfternoon(value: String)
+
+    suspend fun getReminderEvening(): Flow<String?>
+    suspend fun setReminderEvening(value: String)
 }

@@ -1,6 +1,8 @@
 package com.example.composekeepnotescopy.di
 
+import com.example.composekeepnotescopy.data.repository.MainActivityRepositoryImpl
 import com.example.composekeepnotescopy.data.repository.ToDoRepositoryImpl
+import com.example.composekeepnotescopy.domain.MainActivityRepository
 import com.example.composekeepnotescopy.domain.ToDoRepository
 import dagger.Module
 import dagger.Provides
@@ -13,4 +15,7 @@ object RepositoryModule {
 
     @Provides
     fun provideToDoRepository(impl: ToDoRepositoryImpl): ToDoRepository = impl
+
+    @Provides
+    fun provideMainActivityRepository(impl: MainActivityRepositoryImpl): MainActivityRepository = impl
 }
