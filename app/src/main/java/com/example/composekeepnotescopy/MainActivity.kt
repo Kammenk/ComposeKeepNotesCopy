@@ -6,18 +6,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,17 +31,18 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,11 +53,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.composekeepnotescopy.presentation.archive.ArchiveScreen
 import com.example.composekeepnotescopy.presentation.create_label.CreateLabelScreen
-import com.example.composekeepnotescopy.ui.theme.ComposeKeepNotesCopyTheme
 import com.example.composekeepnotescopy.presentation.notes.NotesScreen
 import com.example.composekeepnotescopy.presentation.reminders.RemindersScreen
 import com.example.composekeepnotescopy.presentation.settings.SettingsScreen
 import com.example.composekeepnotescopy.presentation.trash.TrashScreen
+import com.example.composekeepnotescopy.ui.theme.ComposeKeepNotesCopyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -61,13 +66,15 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
         setContent {
             val mainActivityViewModel: MainActivityViewModel = hiltViewModel()
             val state by mainActivityViewModel.state.collectAsStateWithLifecycle()
 
             ComposeKeepNotesCopyTheme(
-                darkTheme = when(state.isDarkTheme) {
+                darkTheme = when (state.isDarkTheme) {
                     ThemeColor.LIGHT.text -> false
                     ThemeColor.DARK.text -> true
                     else -> isSystemInDarkTheme()
@@ -80,6 +87,8 @@ class MainActivity : ComponentActivity() {
 
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val scope = rememberCoroutineScope()
+
+                var searchBarExpanded by rememberSaveable { mutableStateOf(false) }
 
                 ModalNavigationDrawer(
                     drawerState = drawerState, drawerContent = {
@@ -137,39 +146,94 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         topBar = {
-                            TopAppBar(
-                                title = {
-                                    if (selectedScreen != Screen.NOTES.ordinal) {
-                                        Text(Screen.entries[selectedScreen].label)
-                                    } else {
-                                    }
-                                },
-                                navigationIcon = {
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            if (drawerState.isClosed) {
-                                                drawerState.open()
-                                            } else {
-                                                drawerState.close()
+                            if (selectedScreen != Screen.CREATE_EDIT_NOTE.ordinal) {
+                                TopAppBar(
+                                    title = {
+                                        if (selectedScreen != Screen.NOTES.ordinal) {
+                                            Text(Screen.entries[selectedScreen].label)
+                                        } else {
+                                        }
+                                    },
+                                    navigationIcon = {
+                                        IconButton(onClick = {
+                                            scope.launch {
+                                                if (drawerState.isClosed) {
+                                                    drawerState.open()
+                                                } else {
+                                                    drawerState.close()
+                                                }
+                                            }
+                                        }) {
+                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                        }
+                                    },
+                                    actions = {
+                                        if (selectedScreen == Screen.NOTES.ordinal) {
+                                            SearchBar(
+                                                inputField = {
+                                                    SearchBarDefaults.InputField(
+                                                        query = "",
+                                                        onQueryChange = {},
+                                                        onSearch = {},
+                                                        expanded = false,
+                                                        onExpandedChange = { searchBarExpanded = it },
+                                                        placeholder = {
+                                                            Row(modifier = Modifier.wrapContentWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                                                Text("Search Keep")
+
+                                                                IconButton(onClick = {
+                                                                    mainActivityViewModel.onEvent(MainActivityViewModel.MainActivityUiEvent.SetListViewState(!state.isGridListView))
+                                                                }) {
+                                                                    if (state.isGridListView) {
+                                                                        Icon(Icons.Default.GridView, contentDescription = "Grid View")
+
+                                                                    } else {
+                                                                        Icon(Icons.Outlined.Pause, contentDescription = "Grid View", modifier = Modifier.rotate(90F))
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    )
+                                                },
+                                                expanded = false,
+                                                onExpandedChange = { searchBarExpanded = it },
+
+                                                ) {
+                                                Icon(Icons.Default.GridView, contentDescription = "Grid View")
                                             }
                                         }
-                                    }) {
-                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+
+                                        if (selectedScreen == Screen.REMINDERS.ordinal || selectedScreen == Screen.ARCHIVE.ordinal) {
+                                            IconButton(onClick = {}) {
+                                                Icon(Icons.Default.Search, contentDescription = "Search Reminders")
+                                            }
+                                            IconButton(onClick = {
+                                                mainActivityViewModel.onEvent(MainActivityViewModel.MainActivityUiEvent.SetListViewState(!state.isGridListView))
+                                            }) {
+                                                if (state.isGridListView) {
+                                                    Icon(Icons.Default.GridView, contentDescription = "Grid View")
+
+                                                } else {
+                                                    Icon(Icons.Outlined.Pause, contentDescription = "Grid View", modifier = Modifier.rotate(90F))
+                                                }
+                                            }
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         },
                         floatingActionButton = {
-                            ExtendedFloatingActionButton(
-                                onClick = {
-                                    //isDarkTheme.value = !isDarkTheme.value
-                                },
-                                containerColor = Color.Black,
-                                modifier = Modifier
-                                    .border(1.dp, Color.Black, RoundedCornerShape(10.dp)),
-                                contentColor = Color.White
-                            ) {
-                                Icon(Icons.Filled.Add, "Floating action button.")
+                            if (selectedScreen == Screen.NOTES.ordinal || selectedScreen == Screen.REMINDERS.ordinal) {
+                                ExtendedFloatingActionButton(
+                                    onClick = {navController.navigate(route = Screen.CREATE_EDIT_NOTE.route)
+                                              selectedScreen = Screen.CREATE_EDIT_NOTE.ordinal},
+                                    containerColor = Color.Black,
+                                    modifier = Modifier
+                                        .border(1.dp, Color.Black, RoundedCornerShape(10.dp)),
+                                    contentColor = Color.White
+                                ) {
+                                    Icon(Icons.Filled.Add, "Floating action button.")
+                                }
                             }
                         },
                     ) { innerPadding ->
@@ -215,6 +279,12 @@ class MainActivity : ComponentActivity() {
                                                 innerPadding
                                             )
                                         )
+
+                                        Screen.HELP_AND_FEEDBACK -> {
+
+                                        }
+
+                                        else -> {}
                                     }
                                 }
                             }

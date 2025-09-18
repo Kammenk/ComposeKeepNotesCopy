@@ -185,6 +185,7 @@ class SettingsScreenViewModel @Inject constructor(val dataStoreRepository: DataS
         override fun toString(): String {
             val hour = if (hour < 10) "0$hour" else hour
             val minute = if (minute < 10) "0$minute" else minute
+
             return "$hour:$minute"
         }
 

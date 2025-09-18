@@ -27,7 +27,6 @@ class NotesScreenViewModel @Inject constructor(
     fun getTodayTodos() {
         viewModelScope.launch {
             toDoRepository.getTodayToDos().collect { result ->
-                DateUtils.getTodaysDate()
                 when (result) {
                     is Result.Success -> {
                         _state.update { it.copy(isLoading = false) }

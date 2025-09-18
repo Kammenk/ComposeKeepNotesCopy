@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -78,7 +79,19 @@ enum class Screen(
         selectedIcon = Icons.Outlined.Settings,
         unselectedIcon = Icons.Outlined.Settings,
         contentDescription = "Settings"
+    ),
+    HELP_AND_FEEDBACK(
+    route = "help_and_feedback",
+    label = "Help & feedback",
+    selectedIcon = Icons.Outlined.QuestionMark,
+    unselectedIcon = Icons.Outlined.QuestionMark,
+    contentDescription = "Help & feedback"
+    ),
+    CREATE_EDIT_NOTE(
+    route = "create_edit_note",
+    label = "",
+    selectedIcon = Icons.Outlined.QuestionMark,
+    unselectedIcon = Icons.Outlined.QuestionMark,
+    contentDescription = "Create or edit note"
     )
-
-
 }
